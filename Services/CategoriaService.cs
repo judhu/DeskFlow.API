@@ -1,0 +1,56 @@
+using DeskFlow.API.Models.Entities;
+using DeskFlow.API.Repositories;
+
+namespace DeskFlow.API.Services;
+
+public class CategoriaService : ICategoriaService
+{
+    private readonly ICategoriaRepository _repository;
+
+    public CategoriaService(ICategoriaRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<IEnumerable<Categoria>> GetAllAsync()
+    {
+        return await _repository.GetAllAsync();
+    }
+
+    public async Task<Categoria?> GetByIdAsync(int id)
+    {
+        return await _repository.GetByIdAsync(id);
+    }
+
+    public async Task<Categoria> CreateAsync(Categoria categoria)
+    {
+        return await _repository.CreateAsync(categoria);
+    }
+
+    public async Task<bool> UpdateAsync(int id, Categoria categoria)
+    {
+        var categoriaExistente = await _repository.GetByIdAsync(id);
+
+        if (categoriaExistente is null)
+            return false;
+
+        categoriaExistente.Nome = categoria.Nome;
+        categoriaExistente.Descricao = categoria.Descricao;
+
+        await _repository.UpdateAsync(categoriaExistente);
+
+        return true;
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var categoria = await _repository.GetByIdAsync(id);
+
+        if (categoria is null)
+            return false;
+
+        await _repository.DeleteAsync(id);
+
+        return true;
+    }
+}
