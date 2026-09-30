@@ -6,5 +6,5 @@ public class Categoria
 
     public string Nome { get; set; } = string.Empty;
 
-    public string Descricao { get; set; } = string.Empty;
+    public ICollection<Chamado> Chamados { get; set; } = new List<Chamado>();
 }
