@@ -1,55 +1,73 @@
+
+using DeskFlow.API.Data;
 using DeskFlow.API.Models.Entities;
-using DeskFlow.API.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace DeskFlow.API.Services;
 
 public class CategoriaService : ICategoriaService
 {
-    private readonly ICategoriaRepository _repository;
+    private readonly DeskFlowContext _context;
 
-    public CategoriaService(ICategoriaRepository repository)
+    public CategoriaService(DeskFlowContext context)
     {
-        _repository = repository;
+        _context = context;
     }
 
     public async Task<IEnumerable<Categoria>> GetAllAsync()
     {
-        return await _repository.GetAllAsync();
+        return await _context.Categorias
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public async Task<Categoria?> GetByIdAsync(int id)
     {
-        return await _repository.GetByIdAsync(id);
+        return await _context.Categorias
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id);
     }
 
     public async Task<Categoria> CreateAsync(Categoria categoria)
     {
-        return await _repository.CreateAsync(categoria);
+        _context.Categorias.Add(categoria);
+
+        await _context.SaveChangesAsync();
+
+        return categoria;
     }
 
     public async Task<bool> UpdateAsync(int id, Categoria categoria)
     {
-        var categoriaExistente = await _repository.GetByIdAsync(id);
+        var categoriaExistente = await _context.Categorias
+            .FindAsync(id);
 
-        if (categoriaExistente is null)
+        if (categoriaExistente == null)
+        {
             return false;
+        }
 
         categoriaExistente.Nome = categoria.Nome;
         categoriaExistente.Descricao = categoria.Descricao;
 
-        await _repository.UpdateAsync(categoriaExistente);
+        await _context.SaveChangesAsync();
 
         return true;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var categoria = await _repository.GetByIdAsync(id);
+        var categoria = await _context.Categorias
+            .FindAsync(id);
 
-        if (categoria is null)
+        if (categoria == null)
+        {
             return false;
+        }
 
-        await _repository.DeleteAsync(id);
+        _context.Categorias.Remove(categoria);
+
+        await _context.SaveChangesAsync();
 
         return true;
     }
