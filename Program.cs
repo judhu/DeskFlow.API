@@ -11,9 +11,15 @@ builder.Services.AddDbContext<DeskFlowContext>(options =>
 
 // Registro dos serviços
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
+builder.Services.AddScoped<IChamadoService, ChamadoService>();
 
 // Controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler =
+            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
