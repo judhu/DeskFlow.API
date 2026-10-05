@@ -1,4 +1,3 @@
-
 using DeskFlow.API.Data;
 using DeskFlow.API.Models.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -18,10 +17,16 @@ public class ChamadoService : IChamadoService
     {
         var chamado = await _context.Chamados.FindAsync(id);
 
-        if (chamado == null || chamado.Status != StatusChamado.Aberto)
-        {
-            return false;
-        }
+        if (chamado == null)
+{
+    throw new KeyNotFoundException("Chamado não encontrado.");
+}
+
+if (chamado.Status != StatusChamado.Aberto)
+{
+    throw new InvalidOperationException(
+        "O chamado precisa estar aberto para ser iniciado.");
+}
 
         chamado.Status = StatusChamado.EmAndamento;
 
@@ -34,12 +39,22 @@ public class ChamadoService : IChamadoService
     {
         var chamado = await _context.Chamados.FindAsync(id);
 
-        if (chamado == null ||
-            chamado.Status != StatusChamado.EmAndamento ||
-            string.IsNullOrWhiteSpace(solucao))
-        {
-            return false;
-        }
+        if (chamado == null)
+{
+    throw new KeyNotFoundException("Chamado não encontrado.");
+}
+
+if (chamado.Status != StatusChamado.EmAndamento)
+{
+    throw new InvalidOperationException(
+        "O chamado precisa estar em andamento para ser encerrado.");
+}
+
+if (string.IsNullOrWhiteSpace(solucao))
+{
+    throw new ArgumentException(
+        "A solução do chamado é obrigatória.");
+}
 
         chamado.Status = StatusChamado.Fechado;
         chamado.Solucao = solucao;

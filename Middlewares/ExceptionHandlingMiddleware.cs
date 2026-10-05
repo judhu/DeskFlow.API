@@ -25,19 +25,26 @@ public class ExceptionHandlingMiddleware
     }
 
     private static async Task HandleExceptionAsync(
-        HttpContext context,
-        Exception exception)
+    HttpContext context,
+    Exception exception)
+{
+    context.Response.ContentType = "application/json";
+
+    context.Response.StatusCode = exception switch
     {
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+        KeyNotFoundException => (int)HttpStatusCode.NotFound,
+        InvalidOperationException => (int)HttpStatusCode.BadRequest,
+        ArgumentException => (int)HttpStatusCode.BadRequest,
+        _ => (int)HttpStatusCode.InternalServerError
+    };
 
-        var response = new
-        {
-            statusCode = context.Response.StatusCode,
-            message = "Ocorreu um erro interno no servidor."
-        };
+    var response = new
+    {
+        statusCode = context.Response.StatusCode,
+        message = exception.Message
+    };
 
-        await context.Response.WriteAsync(
-            JsonSerializer.Serialize(response));
-    }
+    await context.Response.WriteAsync(
+        JsonSerializer.Serialize(response));
+}
 }
