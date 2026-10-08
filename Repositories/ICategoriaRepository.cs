@@ -13,4 +13,6 @@ public interface ICategoriaRepository
     Task UpdateAsync(Categoria categoria);
 
     Task DeleteAsync(int id);
+
+    Task<bool> HasChamadosAsync(int categoriaId);
 }

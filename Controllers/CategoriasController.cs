@@ -5,7 +5,7 @@ using DeskFlow.API.Models.Entities;
 namespace DeskFlow.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/categorias")]
 public class CategoriasController : ControllerBase
 {
     private readonly ICategoriaService _service;

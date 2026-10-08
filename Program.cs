@@ -1,17 +1,19 @@
 using DeskFlow.API.Data;
 using DeskFlow.API.Services;
+using DeskFlow.API.Repositories;
 using DeskFlow.API.Middlewares;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ConfiguraÃ§Ã£o do banco de dados
+// Configuração do banco de dados
 builder.Services.AddDbContext<DeskFlowContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Registro dos serviÃ§os
+// Registro dos serviços
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IChamadoService, ChamadoService>();
 
 // Controllers
@@ -28,7 +30,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// ConfiguraÃ§Ã£o do ambiente
+// Configuração do ambiente
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

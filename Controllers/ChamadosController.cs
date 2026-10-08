@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DeskFlow.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/chamados")]
 public class ChamadosController : ControllerBase
 {
    private readonly DeskFlowContext _context;
