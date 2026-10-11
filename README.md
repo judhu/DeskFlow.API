@@ -2,268 +2,287 @@
 
 API REST desenvolvida em ASP.NET Core 10 para gerenciamento de chamados de Help Desk.
 
-## Sobre o projeto
+## 1. Sobre o projeto
 
-O DeskFlow API foi desenvolvido como projeto avaliativo do curso de Back-End .NET.
+O **DeskFlow API** é um projeto acadêmico desenvolvido no curso de Back-End .NET, com o objetivo de aplicar conceitos de construção de APIs REST, organização em camadas, injeção de dependência, persistência de dados e implementação de regras de negócio.
 
-A aplicação permite o gerenciamento de categorias e chamados, incluindo abertura, acompanhamento, encerramento e registro de interações.
+A aplicação permite gerenciar categorias de atendimento e chamados de suporte técnico, desde a abertura até o encerramento, incluindo acompanhamento do status, filtros de consulta e registro de interações.
 
-O projeto foi desenvolvido com foco na organização em camadas, separação de responsabilidades, persistência de dados com Entity Framework Core e documentação dos endpoints com Swagger/OpenAPI.
+O projeto utiliza Entity Framework Core para comunicação com o banco de dados SQL Server e Swagger para documentação e testes dos endpoints.
 
-## Tecnologias utilizadas
+## 2. Objetivos do projeto
 
-- C#
-- .NET 10
-- ASP.NET Core Web API
-- Entity Framework Core 10
-- SQL Server
-- Swagger / OpenAPI
-- Git
-- GitHub
+- Desenvolver uma API REST utilizando ASP.NET Core.
+- Implementar operações CRUD para categorias.
+- Gerenciar o ciclo de vida dos chamados.
+- Aplicar regras de negócio para transições de status.
+- Utilizar Entity Framework Core para persistência de dados.
+- Organizar o código em camadas com responsabilidades definidas.
+- Implementar injeção de dependência.
+- Centralizar o tratamento de exceções.
+- Documentar e testar os endpoints com Swagger.
+- Utilizar Git e GitHub para versionamento do código.
 
-## Arquitetura
+## 3. Tecnologias utilizadas
 
-O projeto utiliza uma organização em camadas, separando responsabilidades entre:
+- **C#** — linguagem de programação.
+- **.NET 10** — plataforma de desenvolvimento.
+- **ASP.NET Core Web API** — construção dos endpoints REST.
+- **Entity Framework Core 10** — mapeamento objeto-relacional e acesso ao banco.
+- **SQL Server** — banco de dados relacional.
+- **Swagger / OpenAPI** — documentação e testes da API.
+- **Git e GitHub** — controle de versão e hospedagem do código.
 
-- Controllers
-- Services
-- Repositories
-- Models / Entities
-- Data
-- Middlewares
+## 4. Funcionalidades
 
-Essa organização facilita a manutenção, evolução e separação das responsabilidades da aplicação.
+### 4.1. Gerenciamento de categorias
 
-## Funcionalidades
+- Cadastrar novas categorias.
+- Listar categorias cadastradas.
+- Consultar uma categoria por identificador.
+- Atualizar informações de uma categoria.
+- Excluir categorias, respeitando as restrições de relacionamento com chamados.
 
-### Categorias
+### 4.2. Gerenciamento de chamados
 
-- Criar categoria
-- Listar categorias
-- Consultar categoria por ID
-- Atualizar categoria
-- Excluir categoria
-- Validação de relacionamento com chamados
+- Abrir novos chamados de suporte.
+- Listar chamados cadastrados.
+- Consultar os detalhes de um chamado.
+- Filtrar chamados por status, prioridade e categoria.
+- Iniciar o atendimento de um chamado.
+- Encerrar chamados informando a solução aplicada.
+- Registrar interações durante o atendimento.
+- Consultar informações relacionadas à categoria e às interações do chamado.
 
-### Chamados
+### 4.3. Regras de negócio
 
-- Criar chamado
-- Listar chamados
-- Consultar chamado por ID
-- Atualizar chamado
-- Excluir chamado
-- Filtrar por status
-- Filtrar por prioridade
-- Filtrar por categoria
-- Iniciar chamado
-- Encerrar chamado
-- Registrar interações
-- Consultar detalhes do chamado com categoria e interações
+O sistema controla o ciclo de vida dos chamados por meio dos seguintes estados:
 
-## Ciclo de vida do chamado
+1. **Aberto:** estado inicial atribuído à criação do chamado.
+2. **EmAndamento:** estado definido quando o atendimento é iniciado.
+3. **Fechado:** estado atribuído após o encerramento com a solução informada.
 
-O chamado possui os seguintes estados:
+As transições de status são validadas pelo serviço de chamados. O encerramento exige que o chamado esteja em andamento e que a solução não esteja vazia. Chamados fechados não aceitam novas interações.
 
-- Aberto
-- EmAndamento
-- Fechado
+O sistema também verifica a existência de registros relacionados antes de executar determinadas operações.
 
-O fluxo principal do chamado é:
+## 5. Arquitetura e organização do projeto
 
-**Aberto → EmAndamento → Fechado**
+A aplicação segue uma organização em camadas para separar responsabilidades e facilitar a manutenção.
 
-Para iniciar um chamado, ele deve estar no status `Aberto`.
+- **Controllers:** recebem as requisições HTTP, acionam os serviços ou o contexto de dados utilizado pelo endpoint e retornam as respostas.
+- **Services:** concentram as regras de negócio, incluindo as transições de status dos chamados.
+- **Repositories:** implementam a abstração de acesso a dados utilizada pelas funcionalidades que adotam esse padrão.
+- **Data:** contém o contexto do Entity Framework Core e a configuração de acesso ao banco.
+- **Models:** contém as entidades e os modelos utilizados pela aplicação.
+- **Middlewares:** contém o tratamento global de exceções.
 
-Para encerrar um chamado, ele deve estar no status `EmAndamento` e é necessário informar uma solução.
+A injeção de dependência é configurada no `Program.cs`, permitindo registrar os serviços e demais componentes necessários à execução da API.
 
-Chamados fechados não permitem o registro de novas interações.
+## 6. Endpoints da API
 
-## Principais endpoints
+A API utiliza o prefixo `/api` para os recursos.
 
-### Categorias
+### 6.1. Categorias
 
-```text
-GET     /api/categorias
-GET     /api/categorias/{id}
-POST    /api/categorias
-PUT     /api/categorias/{id}
-DELETE  /api/categorias/{id}
+| Método HTTP | Endpoint | Descrição |
+|---|---|---|
+| GET | `/api/categorias` | Lista as categorias |
+| GET | `/api/categorias/{id}` | Consulta uma categoria pelo ID |
+| POST | `/api/categorias` | Cadastra uma categoria |
+| PUT | `/api/categorias/{id}` | Atualiza uma categoria |
+| DELETE | `/api/categorias/{id}` | Exclui uma categoria |
 
-Chamados
-GET     /api/chamados
-GET     /api/chamados/{id}
-POST    /api/chamados
-PUT     /api/chamados/{id}
-DELETE  /api/chamados/{id}
+### 6.2. Chamados
 
-Ciclo de vida
-POST    /api/chamados/{id}/iniciar
-POST    /api/chamados/{id}/encerrar
+| Método HTTP | Endpoint | Descrição |
+|---|---|---|
+| GET | `/api/chamados` | Lista chamados e permite aplicar filtros |
+| GET | `/api/chamados/{id}` | Consulta um chamado pelo ID |
+| POST | `/api/chamados` | Abre um novo chamado |
+| POST | `/api/chamados/{id}/iniciar` | Inicia o atendimento |
+| POST | `/api/chamados/{id}/encerrar` | Encerra o atendimento informando a solução |
+| POST | `/api/chamados/{id}/interacoes` | Registra uma interação |
 
-Interações
-POST    /api/chamados/{id}/interacoes
+### 6.3. Filtros de consulta
 
-Filtros de chamados
-A listagem de chamados permite utilizar filtros por:
-- Status
-- Prioridade
-- Categoria
-Exemplos:
-GET /api/chamados?status=1
-GET /api/chamados?prioridade=2
-GET /api/chamados?categoriaId=1
+O endpoint `GET /api/chamados` aceita os seguintes parâmetros opcionais:
 
-Os filtros também podem ser combinados:
-GET /api/chamados?status=2&prioridade=3&categoriaId=1
+- `status`
+- `prioridade`
+- `categoriaId`
 
-Relacionamentos
-Os principais relacionamentos da aplicação são:
-Categoria
-   │
-   └── Chamados
-          │
-          └── Interacoes
+Exemplo de consulta:
 
-Um chamado pertence a uma categoria e pode possuir várias interações.
-O relacionamento entre categorias e chamados também garante a integridade referencial dos dados.
-Validações
-A aplicação possui validações para garantir a consistência das informações recebidas pela API.
+`GET /api/chamados?status=2&prioridade=2&categoriaId=6`
 
-Entre elas:
+Os valores numéricos de `status` e `prioridade` devem corresponder aos valores definidos nos enums do projeto.
 
-- Título obrigatório
-- Descrição obrigatória
-- Nome do solicitante obrigatório
-- Limite de caracteres para os campos de texto
-- Categoria deve existir para criação ou atualização de chamado
-- Solução obrigatória para encerramento do chamado
-- Autor e mensagem obrigatórios para registro de interação
-- Chamados fechados não permitem novas interações
+### 6.4. Exemplos de requisições
 
-Tratamento de exceções
+**Cadastrar uma categoria**
 
-A aplicação possui um middleware global para tratamento de exceções.
-O middleware centraliza o tratamento de erros inesperados e retorna respostas padronizadas para a API.
-Isso evita a repetição de tratamentos de exceção nos controllers e facilita a manutenção da aplicação.
+```http
+POST /api/categorias
+Content-Type: application/json
+```
 
-Banco de dados
+O corpo da requisição deve conter os campos definidos no modelo de categoria da aplicação.
 
-O projeto utiliza:
-- SQL Server
-- Entity Framework Core
-- Migrations
+**Abrir um chamado**
 
-As migrations utilizadas no projeto incluem:
+```http
+POST /api/chamados
+Content-Type: application/json
+```
 
-InitialCreate
-AtualizarCamposChamado
+O corpo deve conter os dados exigidos pelo modelo de chamado, incluindo a categoria relacionada.
 
-O arquivo script.sql contém o script SQL gerado a partir das migrations do projeto.
+**Iniciar um chamado**
 
-Como executar o projeto
+```http
+POST /api/chamados/1/iniciar
+```
 
-Pré-requisitos
+**Encerrar um chamado**
 
-- .NET 10 SDK
-- SQL Server
-- Visual Studio Code ou Visual Studio
+```http
+POST /api/chamados/1/encerrar
+Content-Type: application/json
+```
 
-1. Clonar o repositório
+O corpo deve informar a solução no formato esperado pelo endpoint.
+
+**Registrar uma interação**
+
+```http
+POST /api/chamados/1/interacoes
+Content-Type: application/json
+```
+
+O corpo deve conter os dados exigidos pelo modelo de interação.
+
+Os exemplos com identificador `1` são ilustrativos; é necessário utilizar um chamado existente no banco de dados.
+
+## 7. Banco de dados e persistência
+
+O projeto utiliza SQL Server para armazenar as informações e Entity Framework Core para mapear as entidades e executar operações de persistência.
+
+O contexto `DeskFlowContext` centraliza o acesso aos conjuntos de entidades e a configuração utilizada pelo EF Core.
+
+### Migrations
+
+As migrations registradas no projeto são:
+
+- `InitialCreate`
+- `AtualizarCamposChamado`
+- `LimitesTextoChamado`
+
+Elas registram a evolução do esquema do banco de dados ao longo do desenvolvimento.
+
+A migration `LimitesTextoChamado` contempla os limites de tamanho definidos para campos de texto do chamado, conforme a configuração do projeto.
+
+## 8. Validação e tratamento de erros
+
+A aplicação possui um middleware global para tratamento de exceções, registrado no pipeline HTTP.
+
+O middleware transforma exceções conhecidas em respostas HTTP apropriadas, incluindo:
+
+- **404 Not Found:** registro não encontrado.
+- **400 Bad Request:** operação inválida ou dados que não atendem às regras verificadas.
+- **500 Internal Server Error:** erro interno não tratado por uma categoria específica.
+
+Os endpoints também realizam verificações necessárias para operações como abertura de chamados, encerramento e registro de interações.
+
+## 9. Documentação com Swagger
+
+O Swagger fornece uma interface interativa para consultar os endpoints, visualizar os métodos HTTP e executar requisições de teste.
+
+Em ambiente de desenvolvimento, após iniciar a aplicação, acesse a URL indicada no terminal e acrescente `/swagger`.
+
+A disponibilidade da interface depende da configuração do ambiente e do pipeline da aplicação.
+
+## 10. Como executar o projeto
+
+### Pré-requisitos
+
+- .NET SDK 10.
+- SQL Server configurado.
+- Visual Studio Code ou IDE compatível.
+- Git instalado.
+
+### 10.1. Clonar o repositório
+
+```bash
 git clone https://github.com/judhu/DeskFlow.API.git
+```
 
-2. Acessar a pasta do projeto
-cd DeskFlow.API
+### 10.2. Acessar o projeto
 
-3. Restaurar as dependências
+Entre na pasta que contém o arquivo `.csproj` da API.
+
+### 10.3. Configurar a conexão com o banco
+
+Configure a connection string `DefaultConnection` no arquivo `appsettings.json`, utilizando os dados do seu ambiente SQL Server.
+
+Não publique senhas, tokens ou credenciais reais no repositório.
+
+### 10.4. Restaurar as dependências
+
+```bash
 dotnet restore
+```
 
-4. Configurar a conexão com o banco
-Configure a connection string do SQL Server no arquivo:
-appsettings.json
+### 10.5. Aplicar as migrations
 
-5. Aplicar as migrations
+```bash
 dotnet ef database update
+```
 
-6. Executar a aplicação
+Caso a ferramenta de linha de comando do Entity Framework Core não esteja instalada, configure a ferramenta compatível com a versão utilizada no projeto.
+
+### 10.6. Executar a API
+
+```bash
 dotnet run
+```
 
-Após iniciar a aplicação, os endpoints podem ser testados e consultados por meio do Swagger.
+A aplicação exibirá no terminal os endereços em que está disponível.
 
-Swagger / OpenAPI
+## 11. Testes realizados
 
-A aplicação utiliza Swagger para documentação e testes dos endpoints da API.
-Após executar o projeto, acesse a URL apresentada no terminal pela aplicação para abrir a documentação do Swagger.
+Durante o desenvolvimento, foram testados endpoints pelo Swagger, incluindo:
 
-O Swagger permite visualizar os endpoints, parâmetros, modelos de dados e realizar testes diretamente pela interface.
+- Cadastro e consulta de categorias.
+- Atualização de categorias.
+- Verificação das restrições de exclusão de categorias relacionadas a chamados.
+- Abertura e consulta de chamados.
+- Consulta de detalhes e interações.
+- Filtros por status, prioridade e categoria.
+- Início e encerramento de chamados.
+- Validação das regras de negócio para operações inválidas.
+- Registro de interações e bloqueio de interações em chamados fechados.
 
-Estrutura do projeto
+Esses testes permitiram verificar o funcionamento dos principais fluxos implementados.
 
-DeskFlow.API/
-│
-├── Controllers/
-│   ├── CategoriasController.cs
-│   └── ChamadosController.cs
-│
-├── Data/
-│   └── DeskFlowContext.cs
-│
-├── Middlewares/
-│   └── ExceptionHandlingMiddleware.cs
-│
-├── Migrations/
-│
-├── Models/
-│   └── Entities/
-│       ├── Categoria.cs
-│       ├── Chamado.cs
-│       ├── Interacao.cs
-│       ├── Prioridade.cs
-│       └── StatusChamado.cs
-│
-├── Repositories/
-│   ├── CategoriaRepository.cs
-│   └── ICategoriaRepository.cs
-│
-├── Services/
-│   ├── CategoriaService.cs
-│   ├── ICategoriaService.cs
-│   ├── ChamadoService.cs
-│   └── IChamadoService.cs
-│
-├── appsettings.json
-├── appsettings.Development.json
-├── Program.cs
-├── DeskFlow.API.csproj
-└── script.sql
+## 12. Aprendizados
 
-Versionamento
+O desenvolvimento do DeskFlow API permitiu praticar conceitos fundamentais do desenvolvimento Back-End com .NET, como:
 
-O projeto utiliza Git para controle de versão e GitHub para hospedagem do código-fonte.
-Os commits foram organizados de acordo com a evolução das funcionalidades do projeto.
+- Construção de APIs REST.
+- Organização do código em camadas.
+- Injeção de dependência.
+- Persistência com Entity Framework Core.
+- Versionamento de banco de dados por migrations.
+- Implementação de regras de negócio.
+- Tratamento global de exceções.
+- Testes de endpoints com Swagger.
+- Versionamento de código com Git e GitHub.
 
-Repositório:
-https://github.com/judhu/DeskFlow.API
+## 13. Objetivo acadêmico
 
-Testes
+O DeskFlow API foi desenvolvido como parte do projeto avaliativo do curso de Back-End .NET, com foco na aplicação prática dos conceitos estudados e na construção de uma API organizada, funcional e documentada.
 
-Os endpoints da API foram testados utilizando o Swagger / OpenAPI.
+---
 
-Foram realizados testes envolvendo:
-
-- CRUD de categorias
-- CRUD de chamados
-- Filtros de chamados
-- Início de chamados
-- Encerramento de chamados
-- Registro de interações
-- Consulta de detalhes com relacionamentos
-- Validações
-- Restrição de interações em chamados fechados
-
-Autoria
-Juliane Alves de Almeida
-
-Projeto desenvolvido durante o curso de Back-End .NET.
-
-Projeto acadêmico
-Este projeto foi desenvolvido para fins educacionais e acadêmicos, como parte da formação em Back-End .NET.
+**DeskFlow API** — API REST para gerenciamento de chamados de Help Desk.
